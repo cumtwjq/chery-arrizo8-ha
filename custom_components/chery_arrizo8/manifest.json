@@ -1,0 +1,10 @@
+{
+  "domain": "chery_arrizo8",
+  "name": "奇瑞汽车车况（实验版）",
+  "codeowners": [],
+  "config_flow": true,
+  "integration_type": "device",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.6.0"
+}

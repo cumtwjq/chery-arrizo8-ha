@@ -1,0 +1,54 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "奇瑞汽车车况（实验版）",
+        "description": "粘贴本机导出的只读车况请求 JSON。令牌与签名会保存在 Home Assistant 配置中。",
+        "data": {
+          "request_json": "车况请求 JSON"
+        }
+      },
+      "reconfigure": {
+        "title": "更新车况请求",
+        "data": {
+          "request_json": "新的车况请求 JSON"
+        }
+      },
+      "reauth_confirm": {
+        "description": "请用本机抓取工具导出新的车况请求，粘贴到这里以恢复更新。",
+        "title": "登录凭证失效",
+        "data": {
+          "request_json": "新的车况请求 JSON"
+        }
+      }
+    },
+    "error": {
+      "invalid_capture": "请求格式不正确或不是已验证的只读车况接口",
+      "cannot_connect": "无法读取车况，请检查 HA 网络连接或稍后重试",
+      "invalid_auth": "登录凭证已被服务器拒绝，请重新抓取车况请求"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "更新车况请求",
+        "description": "粘贴电脑抓取工具复制的完整车况请求 JSON。地图位置固定按高德坐标校准。",
+        "data": {
+          "request_json": "新的车况请求 JSON"
+        }
+      }
+    },
+    "error": {
+      "invalid_capture": "请求格式不正确或不是已验证的只读车况接口",
+      "cannot_connect": "无法读取车况，请检查 HA 网络连接或稍后重试",
+      "different_vehicle": "这份请求不是当前车辆的车况请求",
+      "invalid_auth": "登录凭证已被服务器拒绝，请重新抓取车况请求"
+    }
+  },
+  "issues": {
+    "credential_expiring": {
+      "title": "奇瑞汽车登录凭证即将到期",
+      "description": "登录凭证将于 {expiry} 到期。请用电脑抓取工具导出新车况请求，并在集成设置中更新。"
+    }
+  }
+}
