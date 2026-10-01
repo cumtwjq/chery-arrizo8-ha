@@ -37,7 +37,7 @@ cards:
         icon: mdi:car-door-lock
       - type: tile
         entity: sensor.REPLACE_STATUS_TIME
-        name: 车况时间
+        name: 车辆上报时间
         icon: mdi:clock-outline
   - type: map
     title: 车辆位置
@@ -47,11 +47,7 @@ cards:
       - device_tracker.REPLACE_LOCATION
 ```
 
-0.3.0 起，总里程和剩余续航显示 `km`，车主确认剩余油量 `oilSurplus` 为百分比，胎压显示 `kPa`。图中车辆为示意插画。
-
-## 想用更丰富的车辆卡片
-
-社区的 [Vehicle status card](https://github.com/ngocjohn/vehicle-status-card) 支持车辆图片、状态指标、胎压和内嵌小地图。若 HA 已装 HACS，可搜索并安装 **Vehicle status card**，然后在卡片的图形编辑器中把车况传感器和本集成新增的「位置」实体对应起来。无需修改集成代码。它是可选界面组件，不参与车辆接口请求。
+总里程和剩余续航显示 `km`，剩余油量显示 `%`，胎压显示 `kPa`。图中车辆为示意插画。
 
 ## 位置精度
 
