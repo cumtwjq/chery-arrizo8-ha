@@ -4,19 +4,7 @@
 
 目标：将国内版「奇瑞汽车」App 中，22 款艾瑞泽8雅的车况以**只读实体**接入 Home Assistant／冬瓜 HAOS。已验证车况接口，并制作了可手动导入已签名请求的[实验版集成](INSTALL.md)。0.2.0 增加车辆位置实体及[仪表板示例](DASHBOARD.md)；0.3.0 为测量实体添加单位；0.4.0 固定高德坐标校准，将「配置」改为更新抓包请求，并按实际响应添加更多车况传感器。0.5.0 根据真实抓包字段补齐中文名称，将设备页精简到常用车况，并逐字段显示已确认的状态代码。0.5.1 修复文字状态被误判成数字导致“不可用”的问题。0.5.2 给设备页实体名称添加排序编号。0.6.0 新增凭证到期修复提醒、明确鉴权失败时重新认证和 HA 上次成功读取时间。手机号登录和自动续期仍在研究。
 
-## 已核实
 
-- [奇瑞汽车 App 积分项目](https://github.com/jiuzihe36/chery-auto-task)记录了国内 App 的短信登录入口 `uaa2c /api/v1/uaa/mobile/mobile-code-login`，以及社区服务域名 `mobile-consumer-sapp.chery.cn`。它没有提供车辆状态接口。
-- [Chery Europe 集成](https://github.com/Przemko92/chery-ha-integration)使用欧洲账号，说明范围是 Chery Europe。
-- [CarLinko 集成](https://github.com/thititongumpun/ha-carlinko)要求 CarLinko 账号；国内版「奇瑞汽车」App 不属于已验证车型。
-- [Omoda／Jaecoo 集成](https://github.com/drake69/omoda-jaecoo-ha)明确表示奇瑞品牌 App 使用不同的登录服务和请求签名，无法直接接入。
-- 奇瑞[官方 App 下载页](https://app.chery.cn/)提供安卓安装包 `https://img.chery.cn/chery-app-fe/android/chery-prod.apk`。2026-09-30 下载的样本 SHA-256 为 `740B8AE5CDC32A9F5D0E36C270DD8A772E803460385BBACA3AB71644A306379A`。APK 仅保存在电脑临时目录，不纳入本项目。
-- 样本的静态字符串包含 `app-lioncloud.mychery.com`、`cloudrivechery.mychery.com`、`uaa2c.chery.cn` 等域名，以及 `/asd/vehicleManage/v1/userVehicle/list`、`/asd/vehicleManage/v1/vehicle/detail`、`/asd/v1/rt/data`、`/asd/v1/vehicle/location` 等路径。这些是**候选接口**，尚未确认具体主机、请求方法、鉴权方式或是否适用于 22 款艾瑞泽8。
-- 安装包同时包含 STSP、NTSP、DTSP 多套模块，须以车主实际账号和车辆分配的平台为准。APK 的 `classes.dex` 经过保护，静态字符串无法直接确定调用链。
-- 使用 iPhone USB 热点作为电脑出口，并将该连接通过 Windows 移动热点共享回 iPhone 后，`cloudrivechery.mychery.com` 可正常连接和解密。实际车况接口为 `POST https://cloudrivechery.mychery.com/cheryAppData/vehicleRealtimeData/{车辆标识}`。请求带 `access_token`、`timestamp`、`userId` 等头，正文含 `requestId`、`appId`、`version`、`sign` 和 JSON 字符串形式的 `data`。响应的 `data` 也是 JSON 字符串，含里程、剩余油量、续航、胎压、车门、车窗、空调等字段。
-- 对这条只读请求做了一次内存中的原样重放，返回 HTTP 200、相同结果码且有车况数据。安卓 APK 的 Java 层使用 SecNeo 壳，反编译只见壳类；签名逻辑暂未找到。
-- 对照试验表明：改动 `sign` 或 `requestId`、删去 `access_token` 会使接口不返回车况；删去 Cookie 或改动时间戳则不影响这条请求。原样请求五分钟后仍有效。44 字符签名解码后长 32 字节；简单 SHA-256/HMAC 组合未匹配。`libapp.so` 经过修复符号表后可用 AOTopsy 分析，但签名实现仍未定位。
-- 已把一次真实车况请求保存在本机 Windows DPAPI 用户加密文件中；它不在项目和安装包里。用此请求调用实验版集成的 `api.py`，已返回 55 个字段，其中包含 `odometer` 与 `oilSurplus`。具体值未输出。升级后的 HA 集成可下载脱敏诊断信息，核对实际返回的车窗、天窗、空调字段，并对照车锁两种状态的代码。
 
 ## 下一步需要的数据
 
