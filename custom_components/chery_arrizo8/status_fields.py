@@ -58,7 +58,7 @@ LABELS = {
     "lAreaTemp": "左侧空调温度",
     "rAreaTemp": "右侧空调温度",
     "airPur": "空气净化代码",
-    "airState": "空调状态代码",
+    "airState": "空调状态",
     "oilCall": "燃油报警代码",
     "waterTempCall": "水温报警代码",
     "speedCar": "车速",
@@ -115,22 +115,21 @@ def ordered_label(key: str, label: str) -> str:
     number = DISPLAY_ORDER.get(key)
     return f"{number:02d} {label}" if number is not None else label
 
-# The captured snapshot confirmed 0 for closed doors, trunk and hood.
-# The user's requested 1=open convention is limited to these fields.
+# The owner confirmed both closed=0 and open=1 for doors, trunk and hood.
 OPEN_CLOSE_FIELDS = frozenset({
     "frontLeftDoor", "frontRightDoor", "backLeftDoor", "backRightDoor",
     "trunkDoor", "hood",
 })
 
 OBSERVED_STATE_CODES: dict[str, dict[str, str]] = {
-    "frontLeftWindowState": {"2": "关闭"},
-    "frontRightWindowState": {"2": "关闭"},
-    "backLeftWindowState": {"2": "关闭"},
-    "backRightWindowState": {"2": "关闭"},
-    "sunroofState": {"1": "关闭"},
-    "airState": {"1": "关闭"},
-    "doorLock": {"0": "已锁"},
-    "engineState": {"0": "熄火"},
+    "frontLeftWindowState": {"1": "通风", "2": "关闭", "3": "完全开启"},
+    "frontRightWindowState": {"1": "通风", "2": "关闭", "3": "完全开启"},
+    "backLeftWindowState": {"1": "通风", "2": "关闭", "3": "完全开启"},
+    "backRightWindowState": {"1": "通风", "2": "关闭", "3": "完全开启"},
+    "sunroofState": {"1": "关闭", "2": "开启", "9": "翘起", "12": "翘起"},
+    "airState": {"0": "开启", "1": "关闭"},
+    "doorLock": {"0": "已锁", "1": "已解锁"},
+    "engineState": {"0": "熄火", "1": "运行"},
 }
 
 

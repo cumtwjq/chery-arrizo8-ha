@@ -33,13 +33,23 @@ class StatusFieldsTest(unittest.TestCase):
 
     def test_binary_open_close_display(self) -> None:
         self.assertEqual(status_fields.display_status_value("frontLeftDoor", "0"), "关闭")
+        for key in status_fields.OPEN_CLOSE_FIELDS:
+            self.assertEqual(status_fields.display_status_value(key, 1), "开启")
         self.assertEqual(status_fields.display_status_value("frontLeftWindowState", 2), "关闭")
-        self.assertEqual(status_fields.display_status_value("frontLeftWindowState", 1), "未识别状态（代码 1）")
+        for key in ("frontLeftWindowState", "frontRightWindowState", "backLeftWindowState", "backRightWindowState"):
+            self.assertEqual(status_fields.display_status_value(key, 1), "通风")
+            self.assertEqual(status_fields.display_status_value(key, 3), "完全开启")
         self.assertEqual(status_fields.display_status_value("sunroofState", "1"), "关闭")
-        self.assertEqual(status_fields.display_status_value("sunroofState", 2), "未识别状态（代码 2）")
+        self.assertEqual(status_fields.display_status_value("sunroofState", 2), "开启")
+        self.assertEqual(status_fields.display_status_value("sunroofState", 9), "翘起")
+        self.assertEqual(status_fields.display_status_value("sunroofState", 12), "翘起")
         self.assertEqual(status_fields.display_status_value("airState", "1"), "关闭")
+        self.assertEqual(status_fields.display_status_value("airState", 0), "开启")
         self.assertEqual(status_fields.display_status_value("doorLock", 0), "已锁")
+        self.assertEqual(status_fields.display_status_value("doorLock", 1), "已解锁")
         self.assertEqual(status_fields.display_status_value("engineState", 0), "熄火")
+        self.assertEqual(status_fields.display_status_value("engineState", 1), "运行")
+        self.assertEqual(status_fields.display_status_value("sunroofState", 7), "未识别状态（代码 7）")
         self.assertEqual(status_fields.display_status_value("oilSurplus", 0), 0)
 
     def test_diagnostics_excludes_private_values(self) -> None:
