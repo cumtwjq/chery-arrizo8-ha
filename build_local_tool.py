@@ -35,12 +35,8 @@ FILES = [
     "local_capture.py",
     "vault.py",
     "export_capture.py",
-    "local_control_capture.py",
-    "run_control_capture.py",
     "获取车况请求.cmd",
     "复制HA车况请求.cmd",
-    "获取控制请求.cmd",
-    "复制HA控制请求.cmd",
     "本地抓取说明.md",
     "MITMPROXY-LICENSE.txt",
 ]
