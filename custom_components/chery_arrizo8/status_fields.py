@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from typing import Any
 
@@ -132,17 +133,40 @@ OBSERVED_STATE_CODES: dict[str, dict[str, str]] = {
     "engineState": {"0": "熄火", "1": "运行"},
 }
 
+DEFAULT_OPEN_LABELS = {
+    "frontLeftWindowState": "开启",
+    "frontRightWindowState": "开启",
+    "backLeftWindowState": "开启",
+    "backRightWindowState": "开启",
+    "sunroofState": "开启",
+    "airState": "开启",
+    "doorLock": "已解锁",
+    "engineState": "运行",
+}
+
+
+def _numeric_state_code(value: Any) -> str | None:
+    """Normalize numeric codes; absent and malformed values are not open states."""
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        return None
+    try:
+        number = float(value)
+    except ValueError:
+        return None
+    if not math.isfinite(number):
+        return None
+    return str(int(number)) if number.is_integer() else str(number)
+
 
 def display_status_value(key: str, value: Any) -> Any:
-    """Translate observed codes and the requested door open/close convention."""
-    if key in OBSERVED_STATE_CODES and isinstance(value, (str, int, float)) and not isinstance(value, bool):
-        code = str(value)
-        return OBSERVED_STATE_CODES[key].get(code, f"未识别状态（代码 {code}）")
-    if key in OPEN_CLOSE_FIELDS and not isinstance(value, bool):
-        if value == 0 or value == "0":
-            return "关闭"
-        if value == 1 or value == "1":
-            return "开启"
+    """Keep verified labels; treat other numeric codes as open per owner preference."""
+    if key in OBSERVED_STATE_CODES or key in OPEN_CLOSE_FIELDS:
+        code = _numeric_state_code(value)
+        if code is None:
+            return None if value is None else f"未识别状态（代码 {value}）"
+        if key in OBSERVED_STATE_CODES:
+            return OBSERVED_STATE_CODES[key].get(code, DEFAULT_OPEN_LABELS[key])
+        return "关闭" if code == "0" else "开启"
     return value
 
 

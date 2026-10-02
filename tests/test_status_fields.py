@@ -49,7 +49,14 @@ class StatusFieldsTest(unittest.TestCase):
         self.assertEqual(status_fields.display_status_value("doorLock", 1), "已解锁")
         self.assertEqual(status_fields.display_status_value("engineState", 0), "熄火")
         self.assertEqual(status_fields.display_status_value("engineState", 1), "运行")
-        self.assertEqual(status_fields.display_status_value("sunroofState", 7), "未识别状态（代码 7）")
+        self.assertEqual(status_fields.display_status_value("sunroofState", 7), "开启")
+        self.assertEqual(status_fields.display_status_value("frontLeftWindowState", 0), "开启")
+        self.assertEqual(status_fields.display_status_value("frontLeftWindowState", "2.0"), "关闭")
+        self.assertEqual(status_fields.display_status_value("airState", 2), "开启")
+        self.assertEqual(status_fields.display_status_value("doorLock", 2), "已解锁")
+        self.assertEqual(status_fields.display_status_value("frontLeftDoor", 2), "开启")
+        self.assertEqual(status_fields.display_status_value("sunroofState", None), None)
+        self.assertEqual(status_fields.display_status_value("sunroofState", "bad"), "未识别状态（代码 bad）")
         self.assertEqual(status_fields.display_status_value("oilSurplus", 0), 0)
 
     def test_diagnostics_excludes_private_values(self) -> None:
