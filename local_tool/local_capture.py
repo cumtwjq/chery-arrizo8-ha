@@ -92,6 +92,7 @@ def response(flow) -> None:
     token = _token(capture["headers"])
     marker = {
         "captured_at": datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "capture_file_modified_ns": VAULT.stat().st_mtime_ns,
         "token_changed": previous_token is None or previous_token != token,
         "token_expires_at": _expiry(token),
     }

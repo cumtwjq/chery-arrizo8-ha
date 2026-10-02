@@ -5,16 +5,25 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import time
 
 from export_capture import main as copy_request
 from local_capture import READY_MARKER
+from vault import VAULT
 
 
 ROOT = Path(__file__).parent
 MITMDUMP = ROOT / "bin" / "mitmdump.exe"
 PORT = 8080
+
+
+def _port_in_use() -> bool:
+    """Detect a proxy left behind by an earlier run before starting another."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as connection:
+        connection.settimeout(0.5)
+        return connection.connect_ex(("127.0.0.1", PORT)) == 0
 
 
 def _show_ipv4_addresses() -> None:
@@ -45,7 +54,12 @@ def main() -> int:
     if not MITMDUMP.is_file():
         print("缺少 bin/mitmdump.exe；请使用完整的本地工具压缩包。")
         return 1
+    if _port_in_use():
+        print("端口 8080 已被占用，可能是上次抓取遗留的代理。")
+        print("请先关闭旧的抓取窗口或代理，再重新运行；本次没有复制任何请求。")
+        return 1
     READY_MARKER.unlink(missing_ok=True)
+    started_ns = time.time_ns()
     _show_ipv4_addresses()
     print("iPhone 请连接能访问这台电脑的 Wi-Fi，手动代理填电脑在该网络的 IPv4 地址，端口 8080。")
     print("先用 Safari 打开 http://mitm.it，确认看到证书页面；已有证书无需重装。")
@@ -63,6 +77,17 @@ def main() -> int:
         while time.monotonic() < deadline:
             if READY_MARKER.is_file():
                 marker = json.loads(READY_MARKER.read_text(encoding="utf-8"))
+                try:
+                    saved_ns = VAULT.stat().st_mtime_ns
+                except OSError:
+                    saved_ns = 0
+                if (
+                    saved_ns < started_ns - 2_000_000_000
+                    or saved_ns != marker.get("capture_file_modified_ns")
+                ):
+                    print("代理返回了抓取标记，但本机加密请求没有在这次运行中更新。")
+                    print("为避免复制旧请求，本次已停止；请检查本地文件权限后重试。")
+                    return 1
                 print("\n已抓到成功的只读车况请求，并在本机加密保存。")
                 print("抓取时间：" + str(marker["captured_at"]))
                 if marker.get("token_expires_at"):
@@ -71,7 +96,12 @@ def main() -> int:
                     print("与上次保存的令牌相比：已变化。")
                 else:
                     print("与上次保存的令牌相比：未变化；若是续期，请检查到期时间是否真的延长。")
-                copy_request()
+                try:
+                    copy_request()
+                except (OSError, RuntimeError, ValueError):
+                    print("抓取已加密保存，但复制到剪贴板失败。")
+                    print("请稍后双击“复制HA车况请求.cmd”重试，不必重新抓包。")
+                    return 1
                 print("到 HA 集成的「配置」粘贴剪贴板内容并提交。")
                 print("完成后把 iPhone 当前 Wi-Fi 的代理改回「关闭」，并复制普通文字覆盖剪贴板。")
                 return 0

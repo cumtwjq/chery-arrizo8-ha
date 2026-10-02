@@ -44,7 +44,13 @@ FILES = [
 DESTINATION.parent.mkdir(exist_ok=True)
 with ZipFile(DESTINATION, "w", ZIP_DEFLATED) as archive:
     for name in FILES:
-        archive.write(LOCAL_TOOL / name, f"arrizo8-local-capture/{name}")
+        source = LOCAL_TOOL / name
+        if name.lower().endswith(".cmd"):
+            # cmd.exe requires CRLF in batch files, including the downloaded ZIP.
+            data = source.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+            archive.writestr(f"arrizo8-local-capture/{name}", data)
+        else:
+            archive.write(source, f"arrizo8-local-capture/{name}")
     archive.write(MITMDUMP, "arrizo8-local-capture/bin/mitmdump.exe")
     with ZipFile(PYTHON_ARCHIVE) as python_archive:
         python_members = python_archive.namelist()
