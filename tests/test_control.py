@@ -48,6 +48,22 @@ STATUS = capture("/cheryAppData/vehicleRealtimeData/getVehicleConditionData")
 
 
 class ControlTest(unittest.TestCase):
+    def test_combined_import_needs_one_paste(self):
+        base = "/cheryAppControl/vehicleRemoteControl/vehicleCommand/"
+        bundle = {
+            "status": STATUS,
+            "controls": {
+                "find_car": capture(base + "findCar"),
+                "unlock": capture(base + "doorState", state="1"),
+                "lock": capture(base + "doorState", state="0"),
+            },
+        }
+        parsed_status, controls = control.parse_request_import(json.dumps(bundle))
+        self.assertEqual(parsed_status["url"], STATUS["url"])
+        self.assertEqual(set(controls), {"find_car", "unlock", "lock"})
+        with self.assertRaises(api.CaptureError):
+            control.parse_request_import(json.dumps({"status": STATUS, "controls": {"find_car": bundle["controls"]["lock"]}}))
+
     def test_known_actions_and_wrong_target_rejected(self):
         base = "/cheryAppControl/vehicleRemoteControl/vehicleCommand/"
         for action, state, expected in (("findCar", None, "find_car"), ("doorState", "1", "unlock"), ("doorState", "0", "lock")):
