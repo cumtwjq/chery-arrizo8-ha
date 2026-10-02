@@ -3,22 +3,22 @@
     "step": {
       "user": {
         "title": "奇瑞汽车车况（实验版）",
-        "description": "粘贴本机导出的车况请求 JSON；若已抓取控制操作，也可粘贴一份合并请求。令牌与签名会保存在 Home Assistant 配置中。",
+        "description": "粘贴本机导出的只读车况请求 JSON。令牌与签名会保存在 Home Assistant 配置中。",
         "data": {
-          "request_json": "车况请求或合并请求 JSON"
+          "request_json": "车况请求 JSON"
         }
       },
       "reconfigure": {
         "title": "更新车况请求",
         "data": {
-          "request_json": "新的车况请求或合并请求 JSON"
+          "request_json": "新的车况请求 JSON"
         }
       },
       "reauth_confirm": {
         "description": "请用本机抓取工具导出新的车况请求，粘贴到这里以恢复更新。",
         "title": "登录凭证失效",
         "data": {
-          "request_json": "新的车况请求或合并请求 JSON"
+          "request_json": "新的车况请求 JSON"
         }
       }
     },
@@ -32,9 +32,9 @@
     "step": {
       "init": {
         "title": "更新车况或导入控制请求",
-        "description": "首次启用控制可把电脑工具复制的合并请求只粘贴到第一栏。以后更新令牌只粘贴新的车况请求；旧签名在新令牌下是否继续有效仍需实测。",
+        "description": "按需填写一项或多项；导入控制请求不会立即操作车辆。更新车况令牌时会同步替换控制请求令牌；旧签名在新令牌下是否继续有效仍需实测。",
         "data": {
-          "request_json": "车况请求或合并请求 JSON（可留空）",
+          "request_json": "新的车况请求 JSON（可留空）",
           "find_car_json": "寻车闪灯请求 JSON（可留空）",
           "unlock_json": "车门解锁请求 JSON（可留空）",
           "lock_json": "车门上锁请求 JSON（可留空）"

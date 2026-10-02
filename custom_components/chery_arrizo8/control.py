@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from aiohttp import ClientSession
 
-from .api import CaptureError, parse_capture
+from .api import CaptureError
 
 
 COMMANDS = {
@@ -16,30 +16,6 @@ COMMANDS = {
     "unlock": ("doorState", "1"),
     "lock": ("doorState", "0"),
 }
-
-
-def parse_request_import(raw: str) -> tuple[dict[str, Any], dict[str, Any] | None]:
-    """Accept a status request or one owner-owned status/control bundle."""
-    try:
-        source = json.loads(raw)
-    except (TypeError, ValueError) as err:
-        raise CaptureError("invalid request JSON") from err
-    if not isinstance(source, dict) or "status" not in source:
-        return parse_capture(raw), None
-    if set(source) != {"status", "controls"} or not isinstance(source["controls"], dict):
-        raise CaptureError("invalid request bundle")
-    status = parse_capture(json.dumps(source["status"], ensure_ascii=False))
-    controls = {}
-    for expected_kind, request in source["controls"].items():
-        if expected_kind not in COMMANDS:
-            raise CaptureError("unsupported bundled command")
-        kind, control = parse_control_capture(json.dumps(request, ensure_ascii=False), status)
-        if kind != expected_kind:
-            raise CaptureError("bundled command mismatch")
-        controls[kind] = control
-    if not controls:
-        raise CaptureError("empty control bundle")
-    return status, controls
 
 
 def _header(capture: dict[str, Any], name: str) -> str | None:

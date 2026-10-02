@@ -14,8 +14,8 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import CaptureAuthError, CaptureError, fetch_vehicle_status
-from .control import carry_controls_forward, parse_control_capture, parse_request_import
+from .api import CaptureAuthError, CaptureError, fetch_vehicle_status, parse_capture
+from .control import carry_controls_forward, parse_control_capture
 from .const import (
     CONF_CAPTURE,
     CONF_CONTROLS,
@@ -56,7 +56,7 @@ class CheryArrizo8ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                capture, controls = parse_request_import(user_input[CONF_REQUEST_JSON])
+                capture = parse_capture(user_input[CONF_REQUEST_JSON])
             except CaptureError:
                 errors["base"] = "invalid_capture"
             else:
@@ -70,7 +70,7 @@ class CheryArrizo8ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     identifier = hashlib.sha256(capture["url"].encode()).hexdigest()
                     await self.async_set_unique_id(identifier)
                     self._abort_if_unique_id_configured()
-                    return self.async_create_entry(title="艾瑞泽8", data={CONF_CAPTURE: capture, CONF_CONTROLS: controls or {}})
+                    return self.async_create_entry(title="艾瑞泽8", data={CONF_CAPTURE: capture})
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({vol.Required(CONF_REQUEST_JSON): selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD))}),
@@ -82,7 +82,7 @@ class CheryArrizo8ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                capture, imported_controls = parse_request_import(user_input[CONF_REQUEST_JSON])
+                capture = parse_capture(user_input[CONF_REQUEST_JSON])
             except CaptureError:
                 errors["base"] = "invalid_capture"
             else:
@@ -98,7 +98,7 @@ class CheryArrizo8ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._abort_if_unique_id_mismatch()
                     return self.async_update_reload_and_abort(
                         self._get_reconfigure_entry(),
-                        data_updates={**_updated_data(self._get_reconfigure_entry(), capture), **({CONF_CONTROLS: imported_controls} if imported_controls is not None else {})},
+                        data_updates=_updated_data(self._get_reconfigure_entry(), capture),
                     )
         return self.async_show_form(
             step_id="reconfigure",
@@ -115,7 +115,7 @@ class CheryArrizo8ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                capture, imported_controls = parse_request_import(user_input[CONF_REQUEST_JSON])
+                capture = parse_capture(user_input[CONF_REQUEST_JSON])
             except CaptureError:
                 errors["base"] = "invalid_capture"
             else:
@@ -131,7 +131,7 @@ class CheryArrizo8ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 else:
                     return self.async_update_reload_and_abort(
                         self._get_reauth_entry(),
-                        data_updates={**_updated_data(self._get_reauth_entry(), capture), **({CONF_CONTROLS: imported_controls} if imported_controls is not None else {})},
+                        data_updates=_updated_data(self._get_reauth_entry(), capture),
                     )
         return self.async_show_form(
             step_id="reauth_confirm",
@@ -150,7 +150,7 @@ class CheryArrizo8OptionsFlow(OptionsFlow):
             capture = self.config_entry.data[CONF_CAPTURE]
             if status_raw:
                 try:
-                    capture, imported_controls = parse_request_import(status_raw)
+                    capture = parse_capture(status_raw)
                 except CaptureError:
                     errors["base"] = "invalid_capture"
             if not errors and status_raw:
@@ -168,8 +168,6 @@ class CheryArrizo8OptionsFlow(OptionsFlow):
                 self.config_entry.data[CONF_CAPTURE], capture,
                 self.config_entry.data.get(CONF_CONTROLS, {}),
             )
-            if status_raw and not errors and imported_controls is not None:
-                controls = imported_controls
             if not errors:
                 for field, expected_kind in CONTROL_INPUTS.items():
                     if not user_input.get(field):
