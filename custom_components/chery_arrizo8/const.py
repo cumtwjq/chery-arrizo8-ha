@@ -2,6 +2,7 @@
 
 DOMAIN = "chery_arrizo8"
 CONF_CAPTURE = "capture"
+CONF_CONTROLS = "controls"
 POLL_MINUTES = 30
 CONF_COORDINATE_SYSTEM = "coordinate_system"
 COORDINATE_SYSTEM_RAW = "raw"

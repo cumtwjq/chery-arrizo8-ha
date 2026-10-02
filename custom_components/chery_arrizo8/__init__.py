@@ -1,4 +1,4 @@
-"""Read-only vehicle status for the Chinese Chery app."""
+"""Vehicle status and explicitly imported experimental commands."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from .api import CaptureAuthError, CaptureError, fetch_vehicle_status
 from .const import CONF_CAPTURE, DOMAIN, POLL_MINUTES
 from .credentials import WARNING_BEFORE_EXPIRY, token_expiry
 
-PLATFORMS = ["sensor", "device_tracker"]
+PLATFORMS = ["sensor", "device_tracker", "button", "switch"]
 _LOGGER = logging.getLogger(__name__)
 
 

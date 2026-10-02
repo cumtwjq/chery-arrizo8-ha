@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 VAULT = Path.home() / "AppData" / "Local" / "Arrizo8HA" / "capture.dpapi"
+CONTROL_KINDS = ("find_car", "unlock", "lock")
 
 
 class DataBlob(ctypes.Structure):
@@ -55,3 +56,20 @@ def save_capture(capture: dict) -> None:
 def load_capture() -> dict:
     """Load the capture locally for the owner's HA import."""
     return json.loads(_crypt(VAULT.read_bytes(), decrypt=True))
+
+
+def control_vault(kind: str) -> Path:
+    if kind not in CONTROL_KINDS:
+        raise ValueError("invalid control kind")
+    return VAULT.with_name(f"control-{kind}.dpapi")
+
+
+def save_control(kind: str, capture: dict) -> None:
+    path = control_vault(kind)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    plaintext = json.dumps(capture, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    path.write_bytes(_crypt(plaintext, decrypt=False))
+
+
+def load_control(kind: str) -> dict:
+    return json.loads(_crypt(control_vault(kind).read_bytes(), decrypt=True))

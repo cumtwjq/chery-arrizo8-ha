@@ -31,10 +31,13 @@
   "options": {
     "step": {
       "init": {
-        "title": "更新车况请求",
-        "description": "粘贴电脑抓取工具复制的完整车况请求 JSON。地图位置固定按高德坐标校准。",
+        "title": "更新车况或导入控制请求",
+        "description": "按需填写一项或多项；导入控制请求不会立即操作车辆。更新车况令牌时会同步替换控制请求令牌；旧签名在新令牌下是否继续有效仍需实测。",
         "data": {
-          "request_json": "新的车况请求 JSON"
+          "request_json": "新的车况请求 JSON（可留空）",
+          "find_car_json": "寻车闪灯请求 JSON（可留空）",
+          "unlock_json": "车门解锁请求 JSON（可留空）",
+          "lock_json": "车门上锁请求 JSON（可留空）"
         }
       }
     },
@@ -42,7 +45,9 @@
       "invalid_capture": "请求格式不正确或不是已验证的只读车况接口",
       "cannot_connect": "无法读取车况，请检查 HA 网络连接或稍后重试",
       "different_vehicle": "这份请求不是当前车辆的车况请求",
-      "invalid_auth": "登录凭证已被服务器拒绝，请重新抓取车况请求"
+      "invalid_auth": "登录凭证已被服务器拒绝，请重新抓取车况请求",
+      "invalid_control_capture": "控制请求无效，或与当前车辆、令牌不一致",
+      "nothing_to_update": "请至少填写一份请求"
     }
   },
   "issues": {
