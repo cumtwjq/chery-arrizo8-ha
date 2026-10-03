@@ -2,6 +2,14 @@
 
 将国内版「奇瑞汽车」App 中的艾瑞泽8车况接入 Home Assistant。当前已在 **2022 款艾瑞泽8雅**上验证，集成只读取车况，不发送车辆控制命令。
 
+## 在 Home Assistant 中的效果
+
+下面两张截图分别展示设备概览和更多车况传感器，包括读取时间、里程、续航和油量。截图来自用户的 HA 环境，其中的车锁和寻车灯控件属于实验版本，当前发布版不提供车辆控制；数值仅为截图时的车辆状态。
+
+![奇瑞艾瑞泽8集成在 Home Assistant 中的设备概览](image/ha-device-overview.png)
+
+![奇瑞艾瑞泽8集成在 Home Assistant 中的车况传感器](image/ha-sensors.png)
+
 ## 下载与安装
 
 从 [Releases](https://github.com/cumtwjq/chery-arrizo8-ha/releases/latest) 下载：
