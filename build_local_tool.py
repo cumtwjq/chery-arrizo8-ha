@@ -56,6 +56,7 @@ with ZipFile(DESTINATION, "w", ZIP_DEFLATED) as archive:
             archive.writestr(f"arrizo8-local-capture/{name}", data)
         else:
             archive.write(source, f"arrizo8-local-capture/{name}")
+    archive.write(ROOT / "INSTALL.md", "arrizo8-local-capture/完整安装教程.md")
     archive.write(MITMDUMP, "arrizo8-local-capture/bin/mitmdump.exe")
     with ZipFile(PYTHON_ARCHIVE) as python_archive:
         python_members = python_archive.namelist()
@@ -65,4 +66,4 @@ with ZipFile(DESTINATION, "w", ZIP_DEFLATED) as archive:
                 data = b"python314.zip\r\n.\r\n..\r\n"
             archive.writestr(f"arrizo8-local-capture/python/{member}", data)
 
-print(f"Built {DESTINATION.name} with {len(FILES) + 1 + len(python_members)} files")
+print(f"Built {DESTINATION.name} with {len(FILES) + 2 + len(python_members)} files")
