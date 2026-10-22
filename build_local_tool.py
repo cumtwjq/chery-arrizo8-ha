@@ -35,8 +35,13 @@ FILES = [
     "local_capture.py",
     "vault.py",
     "export_capture.py",
+    "password_login.py",
+    "copy_app_refresh.py",
+    "windows_aes.py",
     "获取车况请求.cmd",
     "复制HA车况请求.cmd",
+    "账号密码获取App凭证（实验）.cmd",
+    "复制App刷新凭证.cmd",
     "本地抓取说明.md",
     "MITMPROXY-LICENSE.txt",
 ]

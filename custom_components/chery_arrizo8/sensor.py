@@ -36,29 +36,37 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         for key, label in safe_status_fields(coordinator.data)
         if key in ACTIVE_FIELDS
     ]
-    expires_at = token_expiry(entry.data[CONF_CAPTURE])
-    if expires_at is not None:
-        entities.append(CheryTokenExpirySensor(entry, expires_at))
+    if token_expiry(entry.data[CONF_CAPTURE]) is not None:
+        entities.append(CheryTokenExpirySensor(coordinator, entry))
     entities.append(CheryLastSuccessfulFetchSensor(coordinator, entry))
     async_add_entities(entities)
 
 
-class CheryTokenExpirySensor(SensorEntity):
-    """Display the token's declared expiration, regardless of vehicle polling."""
+class CheryTokenExpirySensor(CoordinatorEntity[DataUpdateCoordinator[dict]], SensorEntity):
+    """Display the current token expiry, including after automatic renewal."""
 
     _attr_has_entity_name = True
     _attr_name = "02 登录凭证到期时间"
     _attr_device_class = SensorDeviceClass.TIMESTAMP
 
-    def __init__(self, entry: ConfigEntry, expires_at: datetime) -> None:
+    def __init__(self, coordinator: DataUpdateCoordinator[dict], entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._entry = entry
         self._attr_unique_id = f"{entry.unique_id}_token_expiry"
-        self._attr_native_value = expires_at
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
             name="奇瑞艾瑞泽8",
             manufacturer="奇瑞汽车",
             model="艾瑞泽8",
         )
+
+    @property
+    def available(self) -> bool:
+        return self.native_value is not None
+
+    @property
+    def native_value(self) -> datetime | None:
+        return token_expiry(self._entry.data[CONF_CAPTURE])
 
 
 class CheryLastSuccessfulFetchSensor(CoordinatorEntity[DataUpdateCoordinator[dict]], SensorEntity):

@@ -66,6 +66,18 @@ def parse_capture(raw: str) -> dict[str, Any]:
         raise CaptureError("invalid capture") from err
 
 
+def with_access_token(capture: dict[str, Any], token: str) -> dict[str, Any]:
+    """Keep the owner's signed request intact and replace only its access token."""
+    if not isinstance(token, str) or not token or any(c.isspace() for c in token):
+        raise CaptureAuthError("invalid vehicle access token")
+    headers = dict(capture["headers"])
+    key = next((key for key in headers if key.lower() == "access_token"), None)
+    if key is None:
+        raise CaptureError("missing access token header")
+    headers[key] = token
+    return {"url": capture["url"], "headers": headers, "body": capture["body"]}
+
+
 async def fetch_vehicle_status(session: ClientSession, capture: dict[str, Any]) -> dict[str, Any]:
     """Fetch status with the known-good signed request; no control commands."""
     async with session.post(
