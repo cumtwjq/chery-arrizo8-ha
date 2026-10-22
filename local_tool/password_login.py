@@ -5,10 +5,12 @@ from __future__ import annotations
 import argparse
 import base64
 import getpass
+import hashlib
 import json
 import os
 from pathlib import Path
 import re
+import tempfile
 import urllib.error
 import urllib.request
 import uuid
@@ -20,7 +22,8 @@ from windows_aes import aes_cbc
 
 
 ROOT = Path.home() / "AppData" / "Local" / "Arrizo8HA"
-DEFAULT_APK = ROOT / "chery-prod.apk"
+DEFAULT_APK = Path(__file__).resolve().with_name("chery-prod.apk")
+OFFICIAL_APK_URL = "https://img.chery.cn/chery-app-fe/android/chery-prod.apk"
 DEVICE_FILE = ROOT / "password-login-device.dpapi"
 REFRESH_FILE = ROOT / "app-refresh.dpapi"
 BASE_URL = "https://uaa2c.chery.cn/api/v1"
@@ -33,6 +36,54 @@ HEADERS = {
     "encryptflag": "true",
     "content-type": "application/json; charset=UTF-8",
 }
+
+
+def ensure_apk(apk: Path) -> Path:
+    """Download the APK into the extracted tool folder from Chery's own site."""
+    if apk.is_file():
+        try:
+            app_key(apk)
+            return apk
+        except RuntimeError:
+            print("现有 APK 无法识别，将从奇瑞官网重新下载。")
+    apk.parent.mkdir(parents=True, exist_ok=True)
+    print("正在从奇瑞官网下载奇瑞汽车 APK，首次约需下载数百 MB。")
+    temporary: Path | None = None
+    try:
+        with urllib.request.urlopen(OFFICIAL_APK_URL, timeout=40) as response:
+            if not response.geturl().startswith("https://"):
+                raise RuntimeError("下载地址未使用 HTTPS，已停止。")
+            expected_size = int(response.headers.get("Content-Length") or 0)
+            if expected_size and not 10_000_000 <= expected_size <= 1_000_000_000:
+                raise RuntimeError("官网返回的 APK 大小异常，已停止。")
+            etag = (response.headers.get("ETag") or "").strip('"')
+            checksum = hashlib.md5()
+            with tempfile.NamedTemporaryFile(dir=apk.parent, suffix=".apk.part", delete=False) as output:
+                temporary = Path(output.name)
+                total = 0
+                next_report = 32 * 1024 * 1024
+                while chunk := response.read(1024 * 1024):
+                    output.write(chunk)
+                    checksum.update(chunk)
+                    total += len(chunk)
+                    if total > 1_000_000_000:
+                        raise RuntimeError("下载文件过大，已停止。")
+                    if total >= next_report:
+                        print(f"已下载 {total // (1024 * 1024)} MB")
+                        next_report += 32 * 1024 * 1024
+            if total < 10_000_000 or (expected_size and total != expected_size):
+                raise RuntimeError("APK 下载不完整，未用于登录。")
+            if re.fullmatch(r"[0-9a-fA-F]{32}", etag) and checksum.hexdigest().lower() != etag.lower():
+                raise RuntimeError("APK 下载校验失败，未用于登录。")
+        app_key(temporary)
+        os.replace(temporary, apk)
+        print("官方 APK 已下载到工具目录，下次会直接使用。")
+        return apk
+    except urllib.error.URLError as err:
+        raise RuntimeError("无法从奇瑞官网下载 APK，请检查电脑网络。") from err
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def app_key(apk: Path) -> bytes:
@@ -91,7 +142,7 @@ def main() -> int:
     parser.add_argument("--apk", type=Path, default=DEFAULT_APK, help="车主自行取得的官方奇瑞汽车 APK")
     args = parser.parse_args()
     try:
-        key = app_key(args.apk)
+        key = app_key(ensure_apk(args.apk))
         identity = device_id()
         print("登录会让同一账号的手机 App 暂时退出；手机重新登录后请核实 HA 凭证仍有效。")
         if input("确认现在登录？输入 yes 继续：").strip().lower() != "yes":
