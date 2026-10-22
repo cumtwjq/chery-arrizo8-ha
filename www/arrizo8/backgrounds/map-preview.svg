@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="blocks" width="83" height="52" patternUnits="userSpaceOnUse" patternTransform="rotate(-27)">
+      <rect width="83" height="52" fill="#f6f7f6"/>
+      <path d="M0 0H83M0 0V52M0 52H83M83 0V52" fill="none" stroke="#fff" stroke-width="10"/>
+      <path d="M43 5V47" fill="none" stroke="#fff" stroke-width="5"/>
+    </pattern>
+    <filter id="soft"><feGaussianBlur stdDeviation=".65"/></filter>
+  </defs>
+  <rect width="600" height="320" fill="url(#blocks)"/>
+  <path d="M-40 242 190 115 425 -25M140 365 610 105" fill="none" stroke="#fff" stroke-width="31"/>
+  <path d="M-40 242 190 115 425 -25M140 365 610 105" fill="none" stroke="#fff9dc" stroke-width="15"/>
+  <path d="M-50 36 149 135 359 258 560 356" fill="none" stroke="#fff" stroke-width="19"/>
+  <g filter="url(#soft)" opacity=".45"><path d="M304 145 251 255" stroke="#5bbde3" stroke-width="12" stroke-linecap="round"/></g>
+  <path d="M304 145 251 255" fill="none" stroke="#6bbfe3" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="304" cy="145" r="23" fill="#dbf3fa" opacity=".75"/>
+  <path d="M304 124c-13 0-23 10-23 23 0 17 23 38 23 38s23-21 23-38c0-13-10-23-23-23Z" fill="#58b7e1"/>
+  <circle cx="304" cy="147" r="9" fill="#fff"/>
+</svg>

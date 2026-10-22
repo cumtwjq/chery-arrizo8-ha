@@ -8,6 +8,8 @@
 2. 将其中的 `custom_components/chery_arrizo8` 文件夹上传到 HA 的 `/config/custom_components/chery_arrizo8`。升级时覆盖同名文件。
 3. 重启 Home Assistant。
 
+安装包另含可选的 `www/arrizo8/` 俯视车况卡片。需要时把该目录上传到 `/config/www/arrizo8/`，再按[卡片安装说明](CARD.md)添加资源和仪表板卡片；不使用卡片则无需上传 `www`。
+
 首次配置时，按[本地抓取说明](local_tool/本地抓取说明.md)运行 Windows 工具，获取自己车辆的车况请求。打开 HA「设置 → 设备与服务 → 添加集成」，搜索“奇瑞汽车车况（实验版）”，把工具复制的完整请求粘贴到“车况请求 JSON”并提交。已有集成升级时，无需重新导入请求。
 
 电脑工具会在本机用 Windows DPAPI 加密保存请求；它不会把令牌打印到终端。导入后，HA 会在自己的配置中保存该请求。请勿把请求 JSON、令牌或未脱敏抓包发到聊天或公开平台；导入后复制一段普通文字覆盖剪贴板。
