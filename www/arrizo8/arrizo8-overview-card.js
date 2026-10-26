@@ -32,12 +32,13 @@ const FIELD_LABELS = {
 const DOORS = ["frontLeftDoor", "frontRightDoor", "backLeftDoor", "backRightDoor", "trunk"];
 const WINDOWS = ["frontLeftWindow", "frontRightWindow", "backLeftWindow", "backRightWindow"];
 // Coordinates are measured against the original 1200 px wide, 1520 px tall car viewport.
-// Each of the four windows has one closed strip and one outward opening overlay.
+// Open/Close in the asset names describes the DOOR position, not the glass state.
+// Glass1 matches the sedan/1_***** car images. Closed windows need no overlay.
 const WINDOW_ART = {
-  frontLeftWindow: { side: "leftFront", closed: [342, 440, 54], open: [85, 465, 256] },
-  frontRightWindow: { side: "rightFront", closed: [805, 440, 54], open: [837, 465, 250] },
-  backLeftWindow: { side: "leftBack", closed: [342, 795, 52], open: [85, 880, 276] },
-  backRightWindow: { side: "rightBack", closed: [810, 795, 50], open: [837, 880, 275] },
+  frontLeftWindow: { side: "leftFront", door: "frontLeftDoor", closedDoor: [342, 465, 54], openDoor: [85, 465, 256] },
+  frontRightWindow: { side: "rightFront", door: "frontRightDoor", closedDoor: [805, 465, 54], openDoor: [850, 465, 250] },
+  backLeftWindow: { side: "leftBack", door: "backLeftDoor", closedDoor: [342, 795, 52], openDoor: [0, 795, 276] },
+  backRightWindow: { side: "rightBack", door: "backRightDoor", closedDoor: [810, 795, 50], openDoor: [865, 795, 275] },
 };
 const UNKNOWN = new Set(["unknown", "unavailable", "none", "null", ""]);
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) =>
@@ -176,12 +177,13 @@ class Arrizo8OverviewCard extends HTMLElement {
 
   _windowLayers(imgBase) {
     return WINDOWS.map((key) => {
-      const state = this._open(key);
-      if (state === null) return "";
       const art = WINDOW_ART[key];
-      const [x, y, width] = state ? art.open : art.closed;
-      const filename = `${art.side}${state ? "Open" : "Close"}Glass1.png`;
-      return `<img class="window-layer ${state ? "open" : "closed"}"
+      const doorOpen = this._open(art.door);
+      if (doorOpen === null) return "";
+      if (this._open(key) !== true) return "";
+      const [x, y, width] = doorOpen ? art.openDoor : art.closedDoor;
+      const filename = `${art.side}${doorOpen ? "Open" : "Close"}Glass1.png`;
+      return `<img class="window-layer"
         src="${imgBase}/status/overlays/${filename}"
         style="left:${(x / 1200 * 100).toFixed(3)}%;top:${(y / 1520 * 100).toFixed(3)}%;width:${(width / 1200 * 100).toFixed(3)}%"
         alt="">`;
@@ -233,7 +235,7 @@ class Arrizo8OverviewCard extends HTMLElement {
               ${this._pressure("backRight")}
             </div>
           </div>
-          ${car.unknown ? '<div class="image-note">部分车门状态未知，车图仅显示已确认开启的部位</div>' : ""}
+          ${car.unknown ? '<div class="image-note">部分车门状态未知，对应车窗图层暂不显示</div>' : ""}
           </div>
 
           <div class="right-column">
@@ -372,10 +374,9 @@ Arrizo8OverviewCard.css = `
   .tyre-val strong span { display:inline-block; margin-left:5px; font-size:.58em; font-weight:400; letter-spacing:0; vertical-align:baseline; }
   .roof-layer { position:absolute; inset:0; display:block; width:100%; height:auto; pointer-events:none; z-index:2; }
   .window-layer { position:absolute; display:block; height:auto; pointer-events:none; z-index:3; }
-  .window-layer.closed { filter:hue-rotate(180deg) saturate(.65); opacity:.55; }
-  .window-layer.open { opacity:.8; }
+  .window-layer { opacity:.8; }
   .hood-layer { position:absolute; top:2%; left:28%; width:44%; height:auto; opacity:.7; z-index:3; pointer-events:none; }
-  .tire-mark { position:absolute; z-index:2; width:14%; height:17%; border-radius:10px; background:rgba(52,178,228,.43); box-shadow:0 0 9px rgba(42,170,216,.1); }
+  .tire-mark { position:absolute; z-index:4; width:14%; height:17%; border-radius:10px; background:rgba(52,178,228,.43); box-shadow:0 0 9px rgba(42,170,216,.1); }
   .tire-mark.fl { top:26%; left:20%; }.tire-mark.fr { top:26%; right:20%; }
   .tire-mark.bl { top:67%; left:20%; }.tire-mark.br { top:67%; right:20%; }
   .image-note { margin:0 0 7px; text-align:center; color:#9a4c42; font-size:11px; }
